@@ -1,0 +1,266 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+
+    <!-- Set up page info -->
+    <meta charset="utf-8" />
+    <title>VirtualGamepad Demo</title>
+    <meta name="description" content="VirtualGamepad" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000000;
+        }
+
+             #idp{
+                z-index: 3;
+                position: absolute;
+                top:50px;
+                left: 50%;
+                color: red;
+                font-size: 20;
+            }
+    </style>
+    
+    <!-- Load libraries and game states -->    
+    <script src="phaser.min.js"></script>
+    <script src="vp.js"></script>
+    
+</head>
+    
+<body>
+
+  <p id="idp">okkkkkkkkk</p>
+        <script type="text/javascript">
+var parrafo= document.getElementById("idp");
+        var IDE_HOOK = false;
+        var VERSION = '2.6.2';
+
+        var mx=1800;
+var my=1600;
+var plapos;
+
+var latp=1;;
+var  lngp=2;
+var latypx=2;
+var lngxpx=1;
+var lat2p=10;;
+var  lng2p=20;
+var laty2px=20;
+var lngx2px=10;
+
+var mlat=-2.2185/1000000;
+var blat=2.186599823
+var mlng=2.22038/1000000;
+var blng=-73.78971405;
+var clat=0;
+var clng=0;
+function callat(px){
+
+  clat=  px.x*mlat+blat;
+    return clat;
+}
+function callng(py){
+
+  clng=  py.y*mlng+blng;
+    return clng;
+}
+
+
+
+var game = new Phaser.Game(800, 600, Phaser.CANVAS);
+
+var PhaserGame = function() {
+    this.player = null;
+}
+
+PhaserGame.prototype = {
+    
+    preload: function() {
+        
+        // Load the gamepad spritesheet. Note that the width must equal height
+        // of the sprite.
+    
+        
+        this.load.image('space', 'space_bg.jpg');
+        this.load.image('ship', 'ship.png');
+        this.load.image('laser', 'laser.png');
+
+        this.game.load.spritesheet('gamepad', 
+            'gamepad_spritesheet.png', 100, 100);
+    this.game.load.image('backdrop', 'a1.jpg');
+
+ this.game.load.image('player','cruz.png');
+ this.game.load.image('ref','p2.png');
+    },
+    
+    create: function() {
+    
+        game.renderer.roundPixels = true;
+
+
+
+
+        
+        this.physics.startSystem(Phaser.Physics.ARCADE);
+       
+
+
+mx=6000;
+my=2000;
+//2.185463, -73.783676
+//2.185602, -73.783088
+
+
+//2.186125, -73.776840 da 5792.54 212.46 y lat
+//2.186373, -73.776862 da 5788.22021484375  102.24124908447266
+// 2.184670, -73.789523 ib 48.13 841.23  x lng no sirve
+//2.184779, -73.789594 ib  54.068355560302734 820.7434844970703   xlng
+
+   // game.stage.backgroundColor = 0x000000;
+ fondo=  game.add.sprite(0, 0, 'backdrop');
+ cfondo=  game.add.sprite(0+fondo.width/2, 0+fondo.height/2, 'ref');
+  ibfondo=  game.add.sprite(0, 0+fondo.height, 'ref');
+  dafondo=  game.add.sprite(fondo.width, 0, 'ref');
+
+
+        cfondo.anchor.x = 0.5;
+     cfondo.anchor.y = 0.5;
+       ibfondo.anchor.x = 0.5;
+     ibfondo.anchor.y = 0.5;
+           dafondo.anchor.x = 0.5;
+    dafondo.anchor.y = 0.5;
+   game.world.setBounds(0, 0, mx, my);
+
+
+
+
+
+
+
+
+        
+        this.player = this.add.sprite(250, 250, 'ship');
+        this.player.scale.setTo(0.8, 0.8);
+        this.player.anchor.set(0.5);
+        
+        game.physics.arcade.enable(this.player);
+        this.player.body.drag.set(100);
+        this.player.body.maxVelocity.set(300);
+        this.player.lastAngle = -90;
+         this.game.camera.follow(this.player);
+        
+        var style = {font: '14px Arial', 
+                     fill: '#ffffff', 
+                     align: 'left', 
+                     stroke: '#000000'};
+         
+        this.directionText = this.add.text(20, 20, '', style);
+        this.rectangularText = this.add.text(140, 20, '', style);
+        this.polarText = this.add.text(260, 20, '', style);
+        this.pushText = this.add.text(380, 20, '', style);
+        
+        // Add the VirtualGamepad plugin to the game
+        this.gamepad = this.game.plugins.add(Phaser.Plugin.VirtualGamepad);
+        
+        // Add a joystick to the game (only one is allowed right now)
+        this.joystick = this.gamepad.addJoystick(100, 420, 1.2, 'gamepad');
+        
+        // Add a button to the game (only one is allowed right now)
+        this.button = this.gamepad.addButton(400, 420, 1.0, 'gamepad');
+    },
+    
+    update: function() {
+        this.updateDebugText();
+        
+        // Read joystick data to set ship's angle and acceleration
+        if (this.joystick.properties.inUse) {
+            this.player.angle = this.joystick.properties.angle;
+            this.player.lastAngle = this.player.angle;
+        } else {
+            this.player.angle = this.player.lastAngle;
+        }
+        this.player.body.acceleration.x = 4 * this.joystick.properties.x;
+        this.player.body.acceleration.y = 4 * this.joystick.properties.y;
+        
+        // Fire the lasers!
+        if (this.button.isDown) {
+          //  this.fireLaser();
+        }
+      plapos=String(this.player.x)+"  x -y   "+String(this.player.y);
+    escribir(plapos+"<br>"+"lat:"+callat(this.player)+" lng:"+ callng(this.player));  
+       // this.screenWrap(this.player);
+       // this.lasers.forEachExists(this.screenWrap, this);
+    },
+    
+    fireLaser: function() {
+   /*     if (game.time.now > this.laserTime) {
+            this.laser = this.lasers.getFirstExists(false);
+            if (this.laser) {
+                this.laser.reset(this.player.body.x + 20, 
+                    this.player.body.y + 12);
+                this.laser.lifespan = 2000;
+                this.laser.angle = this.player.angle;
+                game.physics.arcade.velocityFromRotation(this.player.rotation,
+                    400, this.laser.body.velocity);
+                this.laserTime = game.time.now + 100;
+            }
+        }*/
+    },
+    
+    screenWrap: function(sprite) {
+        if (sprite.x < 0)
+        {
+            sprite.x = game.width;
+        }
+        else if (sprite.x > game.width)
+        {
+            sprite.x = 0;
+        }
+
+        if (sprite.y < 0)
+        {
+            sprite.y = game.height;
+        }
+        else if (sprite.y > game.height)
+        {
+            sprite.y = 0;
+        }
+    },
+    
+    updateDebugText: function() {
+        this.directionText.setText("Direction:\n up: " + 
+            this.joystick.properties.up + "\n down: " + 
+            this.joystick.properties.down + "\n left: " + 
+            this.joystick.properties.left + "\n right: " + 
+            this.joystick.properties.right);
+        this.rectangularText.setText("Rectangular:\n x: " + 
+            this.joystick.properties.x + "\n y: " + this.joystick.properties.y);
+        this.polarText.setText("Polar:\n distance: " + 
+            this.joystick.properties.distance + "\n angle: " +
+            (Math.round(this.joystick.properties.angle * 100) / 100) + 
+            "\n rotation: " + 
+            (Math.round(this.joystick.properties.rotation * 100) / 100));
+        this.pushText.setText("Joystick: " + this.joystick.properties.inUse + 
+            "\nButton: " + this.button.isDown);
+    }
+};
+
+game.state.add('Game', PhaserGame, true)
+
+
+
+
+
+function escribir(st){
+
+    parrafo.innerHTML=st;
+}
+
+
+
+    </script>
+    
+</body>
+</html>
