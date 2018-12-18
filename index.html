@@ -20,6 +20,7 @@
                 left: 50%;
                 color: red;
                 font-size: 20;
+                width: 50%;
             }
     </style>
     
@@ -31,7 +32,7 @@
     
 <body>
 
-  <p id="idp">okkkkkkkkk</p>
+  <input id="idp">okkkkkkkkk</input>
         <script type="text/javascript">
 var parrafo= document.getElementById("idp");
         var IDE_HOOK = false;
@@ -49,27 +50,93 @@ var lat2p=10;;
 var  lng2p=20;
 var laty2px=20;
 var lngx2px=10;
+//25.093333333336584 x-y 875.0388888888859 
+//2.184675, -73.789660
 
-var mlat=-2.2185/1000000;
-var blat=2.186599823
-var mlng=2.22038/1000000;
-var blng=-73.78971405;
+
+//2.186426, -73.776903   5765.7711111111075 x-y 73.44888888888512 
+var mlat=  (2.186426-2.184675)/(73.44888888888512-875.0388888888859);//-2.2185038841040900000000;
+var blat=2.186426-mlat*73.44888888888512;
+var mlng=(-73.776903-(-73.789660))/(5765.7711111111075-25.093333333336584);//2.2203806792083700000;
+var blng=-73.776903-mlng*5765.7711111111075;
 var clat=0;
 var clng=0;
+console.log(mlat+"      "+blat);
 function callat(px){
+ clat=0;
 
-  clat=  px.x*mlat+blat;
-    return clat;
+  clat=  px.y*mlat+blat;//-2.2185038841040900000E-06+2.1865998226082100000;
+    return clat-1.46147408002E-05;
+
 }
 function callng(py){
+ clng=0;
+  clng=py.x*mlng+blng;
+    return clng-1.0625977992617700E-05;
 
-  clng=  py.y*mlng+blng;
-    return clng;
+}
+
+
+function escribir(st){
+
+    parrafo.value=st;
+}
+
+var mlt=0;
+var mln=0;
+var blt=0;
+var bln=0;
+function fmlt(lt2,lt1,y2,y1){
+    mlt= (lt2-lt1)/(y2-y1);
+return mlt;
+
+}
+function fblt(xm,ym){
+
+    blt= ym-mlt*xm;
+    return blt;
+
+    
+}
+
+
+function fmln(ln2,ln1,x2,x1){
+    mln=(ln2-ln1)/(x2-x1);
+return mln;
+}
+
+function fbln(xm,ym){
+
+    bln= ym-mln*xm;
+    return bln;
+
+    
+}
+function flt(yy){
+return mlt*yy+blt
+}
+function fln(xx){
+return mln*xx+bln
+}
+//ib 2.184655, -73.789590
+
+
+
+function ds(x2,x1,y2,y1){
+return Math.pow(Math.pow((x2-x1),2)+Math.pow((y2-y1),2),0.5);
 }
 
 
 
-var game = new Phaser.Game(800, 600, Phaser.CANVAS);
+
+var vw = window.innerWidth;
+var vh = window.innerHeight;
+
+
+
+
+
+var game = new Phaser.Game(vw, vh, Phaser.CANVAS);
 
 var PhaserGame = function() {
     this.player = null;
@@ -96,7 +163,7 @@ PhaserGame.prototype = {
     },
     
     create: function() {
-    
+  
         game.renderer.roundPixels = true;
 
 
@@ -121,28 +188,40 @@ my=2000;
    // game.stage.backgroundColor = 0x000000;
  fondo=  game.add.sprite(0, 0, 'backdrop');
  cfondo=  game.add.sprite(0+fondo.width/2, 0+fondo.height/2, 'ref');
-  ibfondo=  game.add.sprite(0, 0+fondo.height, 'ref');
-  dafondo=  game.add.sprite(fondo.width, 0, 'ref');
+  ibfondo=  game.add.sprite(54.523333333334755, 876.1677777777807, 'ship');
+  dafondo=  game.add.sprite(5849.031111111111, 689.1133333333369, 'ship');
 
 
         cfondo.anchor.x = 0.5;
      cfondo.anchor.y = 0.5;
        ibfondo.anchor.x = 0.5;
      ibfondo.anchor.y = 0.5;
+     ibfondo.lat=2.184655;
+     ibfondo.lng=-73.789590;
            dafondo.anchor.x = 0.5;
     dafondo.anchor.y = 0.5;
+
+    dafondo.lat=2.185076;
+    dafondo.lng=-73.776706;
    game.world.setBounds(0, 0, mx, my);
 
 
 
 
 
+ mlat=  (dafondo.lat-ibfondo.lat)/(dafondo.y-ibfondo.y);//-2.2185038841040900000000;
+ blat=dafondo.lat-mlat*dafondo.y;
+ mlng=(-73.776903-(-73.789660))/(5765.7711111111075-25.093333333336584);//2.2203806792083700000;
+ blng=-73.776903-mlng*5765.7711111111075;
+
+//2.185035, -73.776860
+
 
 
 
         
-        this.player = this.add.sprite(250, 250, 'ship');
-        this.player.scale.setTo(0.8, 0.8);
+        this.player = this.add.sprite(1972.084444444444,711.4999999999968, 'ship');
+        //this.player.scale.setTo(1, 1);
         this.player.anchor.set(0.5);
         
         game.physics.arcade.enable(this.player);
@@ -165,10 +244,10 @@ my=2000;
         this.gamepad = this.game.plugins.add(Phaser.Plugin.VirtualGamepad);
         
         // Add a joystick to the game (only one is allowed right now)
-        this.joystick = this.gamepad.addJoystick(100, 420, 1.2, 'gamepad');
+        this.joystick = this.gamepad.addJoystick(vw/2-vw/2*0.6, vh/2, 1.2, 'gamepad');
         
         // Add a button to the game (only one is allowed right now)
-        this.button = this.gamepad.addButton(400, 420, 1.0, 'gamepad');
+        this.button = this.gamepad.addButton(vw/2+vw/4, vh/2, 1.0, 'gamepad');
     },
     
     update: function() {
@@ -178,7 +257,8 @@ my=2000;
         if (this.joystick.properties.inUse) {
             this.player.angle = this.joystick.properties.angle;
             this.player.lastAngle = this.player.angle;
-        } else {
+  //escribir(ds(ibfondo.x,ibfondo.y,this.player.x,this.player.y));
+       } else {
             this.player.angle = this.player.lastAngle;
         }
         this.player.body.acceleration.x = 4 * this.joystick.properties.x;
@@ -188,10 +268,17 @@ my=2000;
         if (this.button.isDown) {
           //  this.fireLaser();
         }
-      plapos=String(this.player.x)+"  x -y   "+String(this.player.y);
-    escribir(plapos+"<br>"+"lat:"+callat(this.player)+" lng:"+ callng(this.player));  
+      plapos=String(this.player.x)+" x-y "+String(this.player.y);
+    escribir(plapos+"   "+"{lat:"+callat(this.player)+","+" lng:"+ callng(this.player)+"};");  
+
+   // fmlt();
+    //fblt();
+
        // this.screenWrap(this.player);
        // this.lasers.forEachExists(this.screenWrap, this);
+
+//escribir(ds(ibfondo.x,this.player.x,ibfondo.y,this.player.y));
+
     },
     
     fireLaser: function() {
@@ -253,10 +340,6 @@ game.state.add('Game', PhaserGame, true)
 
 
 
-function escribir(st){
-
-    parrafo.innerHTML=st;
-}
 
 
 
